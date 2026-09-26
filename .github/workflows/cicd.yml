@@ -54,4 +54,12 @@ jobs:
         run: |
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          
+      - name: Start ASG Instance Refresh
+        run: |
+          aws autoscaling start-instance-refresh \
+            --auto-scaling-group-name name-app-asg \
+            --preferences '{"MinHealthyPercentage": 50, "InstanceWarmup": 120}'
+
+
 
