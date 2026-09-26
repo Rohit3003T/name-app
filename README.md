@@ -277,3 +277,147 @@ The goal of this project is to demonstrate how a simple web application can be d
 **Code → Container → ECR → Automated Deployment → Load Balancer → Auto Scaling → Database → Monitoring**
 
 The application itself is intentionally simple so that the focus remains on the infrastructure, deployment process, security, and automation.
+
+
+## How to Run Locally
+
+### Prerequisites
+
+Make sure you have:
+
+* Git
+* Docker
+* PostgreSQL
+
+Docker packages the application and its Python dependencies into a container, so you don't need to install Python dependencies directly on your machine.
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Rohit3003T/name-app.git
+cd name-app
+```
+
+### 2. Create the PostgreSQL database
+
+Create a PostgreSQL database named:
+
+```text
+nameapp
+```
+or in instance 
+sudo systemctl status postgresql
+
+sudo systemctl start postgresql
+
+sudo -u postgres psql
+
+\c nameapp
+
+Then create the `names` table:
+
+```sql
+CREATE TABLE names (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+```
+
+### 3. Build the Docker image
+
+```bash
+docker build -t name-app .
+```
+
+### 4. Run the application
+
+Replace the database values with your local PostgreSQL credentials:
+
+```bash
+docker run -d \
+  --name name-app \
+  -p 5000:5000 \
+  -e DB_HOST="host.docker.internal" \
+  -e DB_NAME="nameapp" \
+  -e DB_USER="postgres" \
+  -e DB_PASSWORD="your_password" \
+  -e DB_PORT="5432" \
+  name-app
+```
+
+Docker's `-p` option publishes the container port to the host, allowing the application to be accessed from your browser.
+
+### 5. Open the application
+
+Visit:
+
+```text
+http://localhost:5000
+```
+
+### 6. Check the container
+
+```bash
+docker ps
+```
+
+View application logs:
+
+```bash
+docker logs name-app
+```
+
+### 7. Stop the application
+
+```bash
+docker stop name-app
+```
+
+Remove the container:
+
+```bash
+docker rm name-app
+```
+
+---
+
+## Running the AWS Infrastructure
+
+To deploy the complete AWS infrastructure using Terraform:
+
+```bash
+cd terraform
+
+terraform init
+terraform validate
+terraform plan
+terraform apply
+```
+
+After Terraform finishes, the Application Load Balancer URL can be obtained from the Terraform outputs or AWS Console.
+
+The AWS deployment then follows:
+
+```text
+Terraform
+    ↓
+AWS Infrastructure
+    ↓
+ALB
+    ↓
+EC2 Auto Scaling Group
+    ↓
+Docker + Flask
+    ↓
+RDS PostgreSQL
+```
+
+### Destroy AWS Infrastructure
+
+When finished testing:
+
+```bash
+terraform destroy
+```
+
+
